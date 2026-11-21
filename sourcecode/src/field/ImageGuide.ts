@@ -7,6 +7,9 @@ class ImageGuide {
   dirX: Float32Array;
   dirY: Float32Array;
   strength: Float32Array;
+  gx: Float32Array;
+  gy: Float32Array;
+  coherence: Float32Array;
   scale: number = 1.0;
   offsetX: number = 0.0;
   offsetY: number = 0.0;
@@ -38,9 +41,12 @@ class ImageGuide {
 
     const blurred = boxBlur(boxBlur(gray, w, h, 2), w, h, 2);
 
+    this.gx = new Float32Array(n);
+    this.gy = new Float32Array(n);
     this.dirX = new Float32Array(n);
     this.dirY = new Float32Array(n);
     this.strength = new Float32Array(n);
+    this.coherence = new Float32Array(n);
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const xl = Math.max(x - 1, 0);
@@ -57,14 +63,9 @@ class ImageGuide {
         const bm = blurred[yd * w + x];
         const br = blurred[yd * w + xr];
 
-        const gx = (tr + 2.0 * mr + br) - (tl + 2.0 * ml + bl);
-        const gy = (bl + 2.0 * bm + br) - (tl + 2.0 * tm + tr);
-        const mag = Math.sqrt(gx * gx + gy * gy);
-
         const k = y * w + x;
-        this.strength[k] = mag / 4.0;
-        this.dirX[k] = -gy / (mag + 1e-8);
-        this.dirY[k] = gx / (mag + 1e-8);
+        this.gx[k] = (tr + 2.0 * mr + br) - (tl + 2.0 * ml + bl);
+        this.gy[k] = (bl + 2.0 * bm + br) - (tl + 2.0 * tm + tr);
       }
     }
   }
@@ -73,6 +74,44 @@ class ImageGuide {
     this.scale = Math.max(canvasW / this.width, canvasH / this.height);
     this.offsetX = (canvasW - this.width * this.scale) * 0.5;
     this.offsetY = (canvasH - this.height * this.scale) * 0.5;
+  }
+
+  computeTensor(radius: number) {
+    const w = this.width;
+    const h = this.height;
+    const n = w * h;
+
+    let jxx: Float32Array = new Float32Array(n);
+    let jxy: Float32Array = new Float32Array(n);
+    let jyy: Float32Array = new Float32Array(n);
+    for (let k = 0; k < n; k++) {
+      const gx = this.gx[k];
+      const gy = this.gy[k];
+      jxx[k] = gx * gx;
+      jxy[k] = gx * gy;
+      jyy[k] = gy * gy;
+    }
+
+    if (radius > 0) {
+      jxx = boxBlur(boxBlur(jxx, w, h, radius), w, h, radius);
+      jxy = boxBlur(boxBlur(jxy, w, h, radius), w, h, radius);
+      jyy = boxBlur(boxBlur(jyy, w, h, radius), w, h, radius);
+    }
+
+    for (let k = 0; k < n; k++) {
+      const a = jxx[k];
+      const b = jxy[k];
+      const c = jyy[k];
+
+      const phi = 0.5 * Math.atan2(2.0 * b, a - c);
+      this.dirX[k] = -Math.sin(phi);
+      this.dirY[k] = Math.cos(phi);
+
+      const sum = a + c;
+      const diff = (a - c) * (a - c) + 4.0 * b * b;
+      this.coherence[k] = diff / (sum * sum + 1e-12);
+      this.strength[k] = Math.sqrt(sum) / 4.0;
+    }
   }
 
   indexAt(x: number, y: number): number {

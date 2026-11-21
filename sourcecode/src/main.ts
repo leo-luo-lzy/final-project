@@ -24,6 +24,7 @@ const IMAGE_MAX_SIZE = 512;
 const defaultParams = {
   mode: 'Noise',
   edgeThreshold: 0.05,
+  tensorRadius: 4,
   field: 'Curl',
   seed: 256,
   noiseScale: 512,
@@ -96,6 +97,7 @@ function main() {
     let activeGuide: ImageGuide = null;
     if (controls.mode === 'Image' && guide) {
       guide.fitTo(canvas.width, canvas.height);
+      guide.computeTensor(controls.tensorRadius);
       field.applyImage(guide, controls.edgeThreshold);
       activeGuide = guide;
     }
@@ -135,6 +137,8 @@ function main() {
 
     gui.add(controls, 'edgeThreshold', 0.005, 0.3).step(0.005).onFinishChange(restart),
 
+    gui.add(controls, 'tensorRadius', 0, 12).step(1).onFinishChange(restart),
+    
     gui.add(controls, 'field', ['Curl', 'Perlin']).onFinishChange(restart),
 
     gui.add(controls, 'seed', 0, 1000).step(1).onFinishChange(restart),
