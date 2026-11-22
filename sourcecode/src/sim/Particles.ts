@@ -80,8 +80,9 @@ class Particles {
     }
   }
 
-  step(field: FlowField, speed: number, dt: number, alpha: number, batch: LineBatch) {
+  step(field: FlowField, speed: number, dt: number, alpha: number, mouse: Mouse, batch: LineBatch) {
     batch.clear();
+    const r2 = mouse.radius * mouse.radius;
     for (let i = 0; i < this.count; i++) {
       const x0 = this.x[i];
       const y0 = this.y[i];
@@ -92,8 +93,32 @@ class Particles {
         this.vel[1] = -this.vel[1];
       }
 
-      const x1 = x0 + this.vel[0] * speed * dt;
-      const y1 = y0 + this.vel[1] * speed * dt;
+      let fx = 0.0;
+      let fy = 0.0;
+      if (mouse.active) {
+        const dx = x0 - mouse.x;
+        const dy = y0 - mouse.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 9.0 * r2) {
+          const f = Math.exp(-d2 / r2) * mouse.strength;
+          if (mouse.mode === MOUSE_DRAG) {
+            fx = mouse.vx * f;
+            fy = mouse.vy * f;
+          } else {
+            const g = f * speed * 4.0 / mouse.radius;
+            if (mouse.mode === MOUSE_SWIRL) {
+              fx = -dy * g;
+              fy = dx * g;
+            } else {
+              fx = dx * g;
+              fy = dy * g;
+            }
+          }
+        }
+      }
+
+      const x1 = x0 + (this.vel[0] * speed + fx) * dt;
+      const y1 = y0 + (this.vel[1] * speed + fy) * dt;
       this.age[i] += dt;
 
       if (x1 < 0 || x1 >= this.width || y1 < 0 || y1 >= this.height || this.age[i] > this.life[i]) {

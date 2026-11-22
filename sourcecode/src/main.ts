@@ -7,7 +7,7 @@ import LineBatch from './rendering/gl/LineBatch';
 import Accumulator from './rendering/gl/Accumulator';
 import Square from './geometry/Square';
 import FlowField, {FIELD_PERLIN, FIELD_CURL} from './field/FlowField';
-import Particles from './sim/Particles';
+import Particles, {Mouse, MOUSE_DRAG, MOUSE_SWIRL, MOUSE_PUSH} from './sim/Particles';
 import {setNoiseSeed} from './noise/perlin';
 import lineVertSrc from './shaders/line-vert.glsl?raw';
 import lineFragSrc from './shaders/line-frag.glsl?raw';
@@ -22,6 +22,9 @@ const MAX_PARTICLES = 50000;
 const IMAGE_MAX_SIZE = 512;
 
 const defaultParams = {
+  mouseMode: 'Drag',
+  mouseRadius: 200,
+  mouseStrength: 1.0,
   mode: 'Noise',
   edgeThreshold: 0.05,
   tensorRadius: 4,
@@ -131,6 +134,31 @@ function main() {
     imageInput.value = '';
   });
 
+  const mouse: Mouse = {active: false, x: 0, y: 0, vx: 0, vy: 0, mode: MOUSE_DRAG, radius: 200, strength: 1.0};
+  let mousePrevX = 0;
+  let mousePrevY = 0;
+
+  function updatePointer(e: PointerEvent) {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = (e.clientX - rect.left) * canvas.width / rect.width;
+    mouse.y = (e.clientY - rect.top) * canvas.height / rect.height;
+  }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    updatePointer(e);
+    mousePrevX = mouse.x;
+    mousePrevY = mouse.y;
+    mouse.vx = 0;
+    mouse.vy = 0;
+    mouse.active = true;
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (mouse.active) updatePointer(e);
+  });
+  canvas.addEventListener('pointerup', () => { mouse.active = false; });
+  canvas.addEventListener('pointercancel', () => { mouse.active = false; });
+
   const gui = new DAT.GUI();
 
   const guiControllers = [
@@ -158,6 +186,12 @@ function main() {
     gui.add(controls, 'style', ['Ink', 'Glow']),
 
     gui.add(controls, 'inkStrength', 0.2, 3.0).step(0.05),
+
+    gui.add(controls, 'mouseMode', ['Drag', 'Swirl', 'Push']),
+
+    gui.add(controls, 'mouseRadius', 20, 600).step(10),
+
+    gui.add(controls, 'mouseStrength', 0, 3).step(0.05),
 
     gui.add(controls, 'paused'),
   ];
@@ -188,10 +222,19 @@ function main() {
     prev = now;
 
     stats.begin();
-
     if (!controls.paused) {
       field.alignSigns = controls.alignFlow;
-      particles.step(field, controls.speed, dt, controls.alpha, batch);
+      mouse.mode = controls.mouseMode === 'Drag' ? MOUSE_DRAG : (controls.mouseMode === 'Swirl' ? MOUSE_SWIRL : MOUSE_PUSH);
+      mouse.radius = controls.mouseRadius;
+      mouse.strength = controls.mouseStrength;
+      if (dt > 0) {
+        mouse.vx += ((mouse.x - mousePrevX) / dt - mouse.vx) * 0.3;
+        mouse.vy += ((mouse.y - mousePrevY) / dt - mouse.vy) * 0.3;
+      }
+      mousePrevX = mouse.x;
+      mousePrevY = mouse.y;
+
+      particles.step(field, controls.speed, dt, controls.alpha, mouse, batch);
       accum.bind();
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.ONE, gl.ONE);
