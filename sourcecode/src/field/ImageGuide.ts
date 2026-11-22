@@ -110,7 +110,7 @@ class ImageGuide {
       const sum = a + c;
       const diff = (a - c) * (a - c) + 4.0 * b * b;
       this.coherence[k] = diff / (sum * sum + 1e-12);
-      this.strength[k] = Math.sqrt(sum) / 4.0;
+      this.strength[k] = Math.sqrt(this.gx[k] * this.gx[k] + this.gy[k] * this.gy[k]) / 4.0;
     }
   }
 

@@ -71,7 +71,7 @@ class FlowField {
           iy = -iy;
         }
 
-        const w =Math.min(guide.strength[g] /edgeThreshold, 1.0) * guide.coherence[g];
+        const w = Math.min(guide.strength[g] / edgeThreshold, 1.0);
         const dx = this.vx[k] * (1.0 - w) + ix * w;
         const dy = this.vy[k] * (1.0 - w) + iy * w;
         const len = Math.sqrt(dx * dx + dy * dy) + 1e-8;
