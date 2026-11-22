@@ -10,6 +10,7 @@ class FlowField {
   rows: number;
   vx: Float32Array;
   vy: Float32Array;
+  alignSigns: boolean = true;
 
   constructor(width: number, height: number, cellSize: number) {
     this.cellSize = cellSize;
@@ -63,25 +64,30 @@ class FlowField {
       for (let i = 0; i < this.cols; i++) {
         const k = j * this.cols + i;
         const g = guide.indexAt(i * this.cellSize, j * this.cellSize);
-
-        let ix = guide.dirX[g];
-        let iy = guide.dirY[g];
-        if (ix * this.vx[k] + iy * this.vy[k] < 0) {
-          ix = -ix;
-          iy = -iy;
-        }
-
         const w = Math.min(guide.strength[g] / edgeThreshold, 1.0);
-        const dx = this.vx[k] * (1.0 - w) + ix * w;
-        const dy = this.vy[k] * (1.0 - w) + iy * w;
-        const len = Math.sqrt(dx * dx + dy * dy) + 1e-8;
-        this.vx[k] = dx / len;
-        this.vy[k] = dy / len;
+
+        const nx = this.vx[k];
+        const ny = this.vy[k];
+        const tx = guide.dirX[g];
+        const ty = guide.dirY[g];
+
+        const cx = (1.0 - w) * (nx * nx - ny * ny) + w * (tx * tx - ty * ty);
+        const cy = (1.0 - w) * (2.0 * nx * ny) + w * (2.0 * tx * ty);
+        const phi = 0.5 * Math.atan2(cy, cx);
+
+        let dx = Math.cos(phi);
+        let dy = Math.sin(phi);
+        if (dx * nx + dy * ny < 0) {
+          dx = -dx;
+          dy = -dy;
+        }
+        this.vx[k] = dx;
+        this.vy[k] = dy;
       }
     }
   }
 
-  sample(x: number, y: number, out: Float32Array) {
+  sample(x: number, y: number, refX: number, refY: number, out: Float32Array) {
     const gx = x / this.cellSize;
     const gy = y / this.cellSize;
     const i0 = Math.min(Math.max(Math.floor(gx), 0), this.cols - 2);
@@ -94,8 +100,30 @@ class FlowField {
     const k01 = k00 + this.cols;
     const k11 = k01 + 1;
 
-    out[0] = (this.vx[k00] *(1 - tx) +this.vx[k10] * tx) * (1 - ty)+ (this.vx[k01] * (1 - tx) +this.vx[k11] * tx) * ty;
-    out[1] = (this.vy[k00] * (1 - tx) + this.vy[k10] * tx) * (1 - ty)+ (this.vy[k01] * (1 - tx) + this.vy[k11] * tx) * ty;
+    let s00 = 1;
+    let s10 = 1;
+    let s01 = 1;
+    let s11 = 1;
+    if (this.alignSigns) {
+      let rx = refX;
+      let ry = refY;
+      if (rx === 0 && ry === 0) {
+        rx = this.vx[k00];
+        ry = this.vy[k00];
+      }
+      s00 = this.vx[k00] * rx + this.vy[k00] * ry < 0 ? -1 : 1;
+      s10 = this.vx[k10] * rx + this.vy[k10] * ry < 0 ? -1 : 1;
+      s01 = this.vx[k01] * rx + this.vy[k01] * ry < 0 ? -1 : 1;
+      s11 = this.vx[k11] * rx + this.vy[k11] * ry < 0 ? -1 : 1;
+    }
+
+    const w00 = (1 - tx) * (1 - ty) * s00;
+    const w10 = tx * (1 - ty) * s10;
+    const w01 = (1 - tx) * ty * s01;
+    const w11 = tx * ty * s11;
+
+    out[0] = this.vx[k00] * w00 + this.vx[k10] * w10 + this.vx[k01] * w01 + this.vx[k11] * w11;
+    out[1] = this.vy[k00] * w00 + this.vy[k10] * w10 + this.vy[k01] * w01 + this.vy[k11] * w11;
   }
 }
 

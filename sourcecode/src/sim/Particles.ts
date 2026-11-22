@@ -2,6 +2,21 @@ import FlowField from '../field/FlowField';
 import ImageGuide from '../field/ImageGuide';
 import LineBatch from '../rendering/gl/LineBatch';
 
+export const MOUSE_DRAG = 0;
+export const MOUSE_SWIRL = 1;
+export const MOUSE_PUSH = 2;
+
+export interface Mouse {
+  active: boolean;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  mode: number;
+  radius: number;
+  strength: number;
+}
+
 const INKS = [
   [0.07, 0.08, 0.09],
   [0.10, 0.14, 0.32],
@@ -70,7 +85,7 @@ class Particles {
     for (let i = 0; i < this.count; i++) {
       const x0 = this.x[i];
       const y0 = this.y[i];
-      field.sample(x0, y0, this.vel);
+      field.sample(x0, y0, this.vx[i], this.vy[i], this.vel);
 
       if (this.vel[0] * this.vx[i] + this.vel[1] * this.vy[i] < 0) {
         this.vel[0] = -this.vel[0];

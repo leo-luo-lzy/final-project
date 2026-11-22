@@ -35,6 +35,7 @@ const defaultParams = {
   style: 'Ink',
   inkStrength: 1.0,
   paused: false,
+  alignFlow: false,
 };
 
 function main() {
@@ -138,6 +139,7 @@ function main() {
     gui.add(controls, 'edgeThreshold', 0.005, 0.3).step(0.005).onFinishChange(restart),
 
     gui.add(controls, 'tensorRadius', 0, 12).step(1).onFinishChange(restart),
+    gui.add(controls, 'alignFlow'),
     
     gui.add(controls, 'field', ['Curl', 'Perlin']).onFinishChange(restart),
 
@@ -188,6 +190,7 @@ function main() {
     stats.begin();
 
     if (!controls.paused) {
+      field.alignSigns = controls.alignFlow;
       particles.step(field, controls.speed, dt, controls.alpha, batch);
       accum.bind();
       gl.enable(gl.BLEND);
