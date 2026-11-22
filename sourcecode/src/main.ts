@@ -15,6 +15,7 @@ import screenVertSrc from './shaders/screen-vert.glsl?raw';
 import compositeFragSrc from './shaders/composite-frag.glsl?raw';
 import * as DAT from 'dat.gui';
 import ImageGuide from './field/ImageGuide';
+import fadeFragSrc from './shaders/fade-frag.glsl?raw';
 
 const PAPER = [0.96, 0.94, 0.89];
 const CELL_SIZE = 8;
@@ -39,6 +40,7 @@ const defaultParams = {
   inkStrength: 1.0,
   paused: false,
   alignFlow: false,
+  fade: 0,
 };
 
 function main() {
@@ -193,6 +195,8 @@ function main() {
 
     gui.add(controls, 'mouseStrength', 0, 3).step(0.05),
 
+    gui.add(controls, 'fade', 0, 0.05).step(0.002),
+
     gui.add(controls, 'paused'),
   ];
   gui.add(controls, 'Load Image');
@@ -209,6 +213,10 @@ function main() {
   const compositeProg = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, screenVertSrc),
     new Shader(gl.FRAGMENT_SHADER, compositeFragSrc),
+  ]);
+  const fadeProg = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, screenVertSrc),
+    new Shader(gl.FRAGMENT_SHADER, fadeFragSrc),
   ]);
 
   const batch = new LineBatch(MAX_PARTICLES);
@@ -234,9 +242,19 @@ function main() {
       mousePrevX = mouse.x;
       mousePrevY = mouse.y;
 
+      if (mouse.active) {
+        field.sculpt(mouse, Math.min(mouse.strength * 8.0 * dt, 1.0));
+      }
+
       particles.step(field, controls.speed, dt, controls.alpha, mouse, batch);
       accum.bind();
       gl.enable(gl.BLEND);
+      if (controls.fade > 0) {
+        const keep = Math.pow(1.0 - controls.fade, dt * 60.0);
+        gl.blendColor(keep, keep, keep, keep);
+        gl.blendFunc(gl.ZERO, gl.CONSTANT_COLOR);
+        fadeProg.draw(screenQuad);
+      }
       gl.blendFunc(gl.ONE, gl.ONE);
       lineProg.setResolution(accum.width, accum.height);
       batch.draw();

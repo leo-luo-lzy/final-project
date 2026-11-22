@@ -1,5 +1,6 @@
 import {fbmPerlin3D} from '../noise/perlin';
 import ImageGuide from './ImageGuide';
+import {Mouse, MOUSE_DRAG, MOUSE_SWIRL} from '../sim/Particles';
 
 export const FIELD_PERLIN = 0;
 export const FIELD_CURL = 1;
@@ -83,6 +84,47 @@ class FlowField {
         }
         this.vx[k] = dx;
         this.vy[k] = dy;
+      }
+    }
+  }
+
+  sculpt(mouse: Mouse, amount: number) {
+    const r = mouse.radius;
+    const r2 = r * r;
+    const mspeed = Math.sqrt(mouse.vx * mouse.vx + mouse.vy * mouse.vy);
+    if (mouse.mode === MOUSE_DRAG && mspeed < 20.0) return;
+
+    const i0 = Math.max(Math.floor((mouse.x - 2.0 * r) / this.cellSize), 0);
+    const i1 = Math.min(Math.ceil((mouse.x + 2.0 * r) / this.cellSize), this.cols - 1);
+    const j0 = Math.max(Math.floor((mouse.y - 2.0 * r) / this.cellSize), 0);
+    const j1 = Math.min(Math.ceil((mouse.y + 2.0 * r) / this.cellSize), this.rows - 1);
+
+    for (let j = j0; j <= j1; j++) {
+      for (let i = i0; i <= i1; i++) {
+        const dx = i * this.cellSize - mouse.x;
+        const dy = j * this.cellSize - mouse.y;
+        const d = Math.sqrt(dx * dx + dy * dy) + 1e-4;
+
+        let tx = 0.0;
+        let ty = 0.0;
+        if (mouse.mode === MOUSE_DRAG) {
+          tx = mouse.vx / mspeed;
+          ty = mouse.vy / mspeed;
+        } else if (mouse.mode === MOUSE_SWIRL) {
+          tx = -dy / d;
+          ty = dx / d;
+        } else {
+          tx = dx / d;
+          ty = dy / d;
+        }
+
+        const w = Math.exp(-(dx * dx + dy * dy) / r2) * amount;
+        const k = j * this.cols + i;
+        const vx = this.vx[k] * (1.0 - w) + tx * w;
+        const vy = this.vy[k] * (1.0 - w) + ty * w;
+        const len = Math.sqrt(vx * vx + vy * vy) + 1e-8;
+        this.vx[k] = vx / len;
+        this.vy[k] = vy / len;
       }
     }
   }
