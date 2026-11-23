@@ -42,6 +42,7 @@ const defaultParams = {
   alignFlow: false,
   fade: 0.004,
   showField: false,
+  paperTexture: 0,
 };
 
 function main() {
@@ -191,6 +192,8 @@ function main() {
 
     gui.add(controls, 'inkStrength', 0.2, 3.0).step(0.05),
 
+    gui.add(controls, 'paperTexture', 0, 1).step(0.05),
+
     gui.add(controls, 'mouseMode', ['Drag', 'Swirl']),
 
     gui.add(controls, 'mouseRadius', 20, 600).step(10),
@@ -271,6 +274,7 @@ function main() {
     compositeProg.setAccum(0);
     compositeProg.setPaper(PAPER[0], PAPER[1], PAPER[2]);
     compositeProg.setInkStrength(controls.inkStrength);
+    compositeProg.setPaperTex(controls.paperTexture);
     compositeProg.setMode(controls.style === 'Ink' ? 0 : 1);
     compositeProg.draw(screenQuad);
 

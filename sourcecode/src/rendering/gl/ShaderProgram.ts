@@ -36,6 +36,7 @@ class ShaderProgram {
   unifAccum: WebGLUniformLocation;
   unifPaper: WebGLUniformLocation;
   unifInkStrength: WebGLUniformLocation;
+  unifPaperTex: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -62,6 +63,7 @@ class ShaderProgram {
     this.unifAccum      = gl.getUniformLocation(this.prog, "u_Accum");
     this.unifPaper      = gl.getUniformLocation(this.prog, "u_Paper");
     this.unifInkStrength = gl.getUniformLocation(this.prog, "u_InkStrength");
+    this.unifPaperTex = gl.getUniformLocation(this.prog, "u_PaperTex");
   }
 
   use() {
@@ -132,6 +134,10 @@ class ShaderProgram {
   setInkStrength(k: number) {
     this.use();
     gl.uniform1f(this.unifInkStrength, k);
+  }
+  setPaperTex(t: number) {
+    this.use();
+    gl.uniform1f(this.unifPaperTex, t);
   }
 
   draw(d: Drawable) {
