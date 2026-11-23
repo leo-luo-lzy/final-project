@@ -40,7 +40,8 @@ const defaultParams = {
   inkStrength: 1.0,
   paused: false,
   alignFlow: false,
-  fade: 0,
+  fade: 0.004,
+  showField: false,
 };
 
 function main() {
@@ -164,6 +165,7 @@ function main() {
   const gui = new DAT.GUI();
 
   const guiControllers = [
+    gui.add(controls, 'showField'),
     gui.add(controls, 'mode', ['Noise', 'Image']).onFinishChange(restart),
 
     gui.add(controls, 'edgeThreshold', 0.005, 0.3).step(0.005).onFinishChange(restart),
@@ -220,6 +222,7 @@ function main() {
   ]);
 
   const batch = new LineBatch(MAX_PARTICLES);
+  const debugBatch = new LineBatch(100000);
   const screenQuad = new Square(vec3.fromValues(0, 0, 0));
   screenQuad.create();
 
@@ -270,6 +273,12 @@ function main() {
     compositeProg.setInkStrength(controls.inkStrength);
     compositeProg.setMode(controls.style === 'Ink' ? 0 : 1);
     compositeProg.draw(screenQuad);
+
+    if (controls.showField) {
+      lineProg.setResolution(canvas.width, canvas.height);
+      field.drawDebug(debugBatch, 3, 18, !controls.alignFlow);
+      debugBatch.draw();
+    }
 
     if (saveRequested) {
       saveRequested = false;

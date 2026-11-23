@@ -1,6 +1,7 @@
 import {fbmPerlin3D} from '../noise/perlin';
 import ImageGuide from './ImageGuide';
 import {Mouse, MOUSE_DRAG} from '../sim/Particles';
+import LineBatch from '../rendering/gl/LineBatch';
 
 export const FIELD_PERLIN = 0;
 export const FIELD_CURL = 1;
@@ -12,6 +13,7 @@ class FlowField {
   vx: Float32Array;
   vy: Float32Array;
   alignSigns: boolean = true;
+  weight: Float32Array;
 
   constructor(width: number, height: number, cellSize: number) {
     this.cellSize = cellSize;
@@ -19,6 +21,7 @@ class FlowField {
     this.rows = Math.ceil(height / cellSize) + 1;
     this.vx = new Float32Array(this.cols * this.rows);
     this.vy = new Float32Array(this.cols * this.rows);
+    this.weight = new Float32Array(this.cols * this.rows);
   }
 
   build(type: number, noiseScale: number, octaves: number, time: number) {
@@ -84,6 +87,7 @@ class FlowField {
         }
         this.vx[k] = dx;
         this.vy[k] = dy;
+        this.weight[k] = w;
       }
     }
   }
@@ -163,6 +167,30 @@ class FlowField {
 
     out[0] = this.vx[k00] * w00 + this.vx[k10] * w10 + this.vx[k01] * w01 + this.vx[k11] * w11;
     out[1] = this.vy[k00] * w00 + this.vy[k10] * w10 + this.vy[k01] * w01 + this.vy[k11] * w11;
+  }
+
+  drawDebug(batch: LineBatch, every: number, len: number, showSign: boolean) {
+    batch.clear();
+    for (let j = 0; j < this.rows; j += every) {
+      for (let i = 0; i < this.cols; i += every) {
+        const k = j * this.cols + i;
+        const x = i * this.cellSize;
+        const y = j * this.cellSize;
+        const hx = this.vx[k] * len * 0.5;
+        const hy = this.vy[k] * len * 0.5;
+        const w = this.weight[k];
+        const r = 0.15 + 0.75 * w;
+        const b = 0.85 - 0.6 * w;
+        
+        if (showSign) {
+          batch.push(x - hx, y - hy, x, y, 0.35, 0.35, 0.35, 1.0);
+          batch.push(x, y, x + hx, y + hy, r, 0.2, b, 1.0);
+        } else {
+          batch.push(x - hx, y - hy, x + hx, y + hy, r, 0.2, b, 1.0);
+        }
+        // batch.push(x - hx, y - hy, x + hx, y + hy, 0.15 + 0.75 * w, 0.2, 0.85 - 0.6 * w, 1.0);
+      }
+    }
   }
 }
 
