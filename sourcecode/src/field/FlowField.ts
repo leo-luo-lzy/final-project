@@ -1,6 +1,6 @@
 import {fbmPerlin3D} from '../noise/perlin';
 import ImageGuide from './ImageGuide';
-import {Mouse, MOUSE_DRAG, MOUSE_SWIRL} from '../sim/Particles';
+import {Mouse, MOUSE_DRAG} from '../sim/Particles';
 
 export const FIELD_PERLIN = 0;
 export const FIELD_CURL = 1;
@@ -110,12 +110,9 @@ class FlowField {
         if (mouse.mode === MOUSE_DRAG) {
           tx = mouse.vx / mspeed;
           ty = mouse.vy / mspeed;
-        } else if (mouse.mode === MOUSE_SWIRL) {
+        } else {
           tx = -dy / d;
           ty = dx / d;
-        } else {
-          tx = dx / d;
-          ty = dy / d;
         }
 
         const w = Math.exp(-(dx * dx + dy * dy) / r2) * amount;

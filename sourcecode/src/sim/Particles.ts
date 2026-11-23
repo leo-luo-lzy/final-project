@@ -4,7 +4,6 @@ import LineBatch from '../rendering/gl/LineBatch';
 
 export const MOUSE_DRAG = 0;
 export const MOUSE_SWIRL = 1;
-export const MOUSE_PUSH = 2;
 
 export interface Mouse {
   active: boolean;
@@ -106,13 +105,8 @@ class Particles {
             fy = mouse.vy * f;
           } else {
             const g = f * speed * 4.0 / mouse.radius;
-            if (mouse.mode === MOUSE_SWIRL) {
-              fx = -dy * g;
-              fy = dx * g;
-            } else {
-              fx = dx * g;
-              fy = dy * g;
-            }
+            fx = -dy * g;
+            fy = dx * g;
           }
         }
       }

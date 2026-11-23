@@ -7,7 +7,7 @@ import LineBatch from './rendering/gl/LineBatch';
 import Accumulator from './rendering/gl/Accumulator';
 import Square from './geometry/Square';
 import FlowField, {FIELD_PERLIN, FIELD_CURL} from './field/FlowField';
-import Particles, {Mouse, MOUSE_DRAG, MOUSE_SWIRL, MOUSE_PUSH} from './sim/Particles';
+import Particles, {Mouse, MOUSE_DRAG, MOUSE_SWIRL} from './sim/Particles';
 import {setNoiseSeed} from './noise/perlin';
 import lineVertSrc from './shaders/line-vert.glsl?raw';
 import lineFragSrc from './shaders/line-frag.glsl?raw';
@@ -189,7 +189,7 @@ function main() {
 
     gui.add(controls, 'inkStrength', 0.2, 3.0).step(0.05),
 
-    gui.add(controls, 'mouseMode', ['Drag', 'Swirl', 'Push']),
+    gui.add(controls, 'mouseMode', ['Drag', 'Swirl']),
 
     gui.add(controls, 'mouseRadius', 20, 600).step(10),
 
@@ -232,7 +232,7 @@ function main() {
     stats.begin();
     if (!controls.paused) {
       field.alignSigns = controls.alignFlow;
-      mouse.mode = controls.mouseMode === 'Drag' ? MOUSE_DRAG : (controls.mouseMode === 'Swirl' ? MOUSE_SWIRL : MOUSE_PUSH);
+      mouse.mode = controls.mouseMode === 'Drag' ? MOUSE_DRAG : MOUSE_SWIRL;
       mouse.radius = controls.mouseRadius;
       mouse.strength = controls.mouseStrength;
       if (dt > 0) {
