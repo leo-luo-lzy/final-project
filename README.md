@@ -99,15 +99,17 @@ Cut:
 
 ### Current Results
 
-| Example 1 | Example 2 |
+| Generated Painting | Painting with Paper Tex |
 |---|---|
 | ![](result/r5.png) | ![](result/r6.png) |
 | ![](result/r7.png) | ![](result/r8.png) |
+| ![](result/r9.png) | ![](result/r10.png) |
+| ![](result/r11.png) | ![](result/r12.png) |
 
 
 ### Next Steps
 
-For the final submission, I will tune the visual results, check performance, and prepare example paintings and a short demo.
+- **Variable stroke widths:** I decided to keep thin, fixed-width lines to preserve the flowing-line style. Overlapping lines already create areas that look heavier or lighter, so variable widths were not needed for the look I wanted.
 
 
 ---  
