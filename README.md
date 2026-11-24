@@ -101,8 +101,8 @@ Cut:
 
 | Example 1 | Example 2 |
 |---|---|
-| ![](result/r5.jpg) | ![](result/r6.png) |
-| ![](result/r7.jpg) | ![](result/r8.png) |
+| ![](result/r5.png) | ![](result/r6.png) |
+| ![](result/r7.png) | ![](result/r8.png) |
 
 
 ### Next Steps
