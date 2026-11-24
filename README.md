@@ -95,17 +95,30 @@ This milestone focused on improving image guidance and adding more control over 
 
 ### What I Cut
 
-I decided to keep thin, fixed-width lines to preserve the flowing-line style. Overlapping lines already create areas that look heavier or lighter, so variable widths were not needed for the look I wanted.
+I decided to keep thin, fixed-width lines. Overlapping lines already create thicker, darker strokes, so I didn't add variable stroke widths.
+
+
 
 ### Current Results
 
-| Generated Painting | With Paper Texture / Mouse Interaction / Flow Visualization |
+| Input Image | Milestone 1 | Milestone 2 |
+|---|---|---|
+| ![](result/i2.jpg) | ![](result/r2.png) | ![](result/r5.png) |
+| ![](result/i3.png) | ![](result/r3.png) | ![](result/r7.png) |
+| ![](result/i4.jpg) | | ![](result/r9.png) |
+| ![](result/i5.jpg) | | ![](result/r11.png) |
+
+| Before | After dragging |
 |---|---|
 | ![](result/r5.png) | ![](result/r6.png) |
-| ![](result/r7.png) | ![](result/r8.png) |
-| ![](result/r9.png) | ![](result/r10.png) |
-| ![](result/r11.png) | ![](result/r12.png) |
 
+**Paper texture** (1:1 crops)
+
+| Off | On |
+|---|---|
+| ![](result/paper-off-1.jpg) | ![](result/paper-on-1.jpg) |
+| ![](result/paper-off-2.jpg) | ![](result/paper-on-2.jpg) |
+| ![](result/paper-off-3.jpg) | ![](result/paper-on-3.jpg) |
 
 ### Next Steps
 
