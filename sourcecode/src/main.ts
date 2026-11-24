@@ -169,55 +169,73 @@ function main() {
   const gui = new DAT.GUI();
 
   const guiControllers = [
-    gui.add(controls, 'showField'),
-
     gui.add(controls, 'mode', ['Noise', 'Image']).onFinishChange(restart),
-
-    gui.add(controls, 'edgeThreshold', 0.005, 0.3).step(0.005).onFinishChange(restart),
-
-    gui.add(controls, 'tensorRadius', 0, 12).step(1).onFinishChange(restart),
-
-    gui.add(controls, 'brightnessDensity', 0, 1).step(0.05),
-
-    gui.add(controls, 'photoColor'),
-
-    gui.add(controls, 'alignFlow'),
-    
-    gui.add(controls, 'field', ['Curl', 'Perlin']).onFinishChange(restart),
-
-    gui.add(controls, 'seed', 0, 1000).step(1).onFinishChange(restart),
-
-    gui.add(controls, 'noiseScale', 10, 6000).step(10).onFinishChange(restart),
-
-    gui.add(controls, 'octaves', 1, 6).step(1).onFinishChange(restart),
-
-    gui.add(controls, 'particleCount', 1000, MAX_PARTICLES).step(1000).onFinishChange(restart),
-
-    gui.add(controls, 'speed', 20, 400),
-
-    gui.add(controls, 'alpha', 0.01, 0.3).step(0.01),
-
-    gui.add(controls, 'style', ['Ink', 'Glow']),
-
-    gui.add(controls, 'inkStrength', 0.2, 3.0).step(0.05),
-
-    gui.add(controls, 'paperTexture', 0, 1).step(0.05),
-
-    gui.add(controls, 'mouseMode', ['Drag', 'Swirl']),
-
-    gui.add(controls, 'mouseRadius', 20, 600).step(10),
-
-    gui.add(controls, 'mouseStrength', 0, 3).step(0.05),
-
-    gui.add(controls, 'fade', 0, 0.05).step(0.001),
 
     gui.add(controls, 'paused'),
   ];
   gui.add(controls, 'Load Image');
   gui.add(controls, 'Clear');
-  gui.add(controls, 'New Seed');
   gui.add(controls, 'Save PNG');
   gui.add(controls, 'Reset');
+
+  const fieldFolder = gui.addFolder('Field');
+  guiControllers.push(
+    fieldFolder.add(controls, 'field', ['Curl', 'Perlin']).onFinishChange(restart),
+
+    fieldFolder.add(controls, 'seed', 0, 1000).step(1).onFinishChange(restart),
+
+    fieldFolder.add(controls, 'noiseScale', 10, 6000).step(10).onFinishChange(restart),
+
+    fieldFolder.add(controls, 'octaves', 1, 6).step(1).onFinishChange(restart),
+
+    fieldFolder.add(controls, 'alignFlow'),
+
+    fieldFolder.add(controls, 'showField'),
+  );
+  fieldFolder.add(controls, 'New Seed');
+  fieldFolder.open();
+
+  const imageFolder = gui.addFolder('Image');
+  guiControllers.push(
+    imageFolder.add(controls, 'edgeThreshold', 0.005, 0.3).step(0.005).onFinishChange(restart),
+
+    imageFolder.add(controls, 'tensorRadius', 0, 12).step(1).onFinishChange(restart),
+
+    imageFolder.add(controls, 'brightnessDensity', 0, 1).step(0.05),
+
+    imageFolder.add(controls, 'photoColor'),
+  );
+  imageFolder.open();
+
+  const particleFolder = gui.addFolder('Particles');
+  guiControllers.push(
+    particleFolder.add(controls, 'particleCount', 1000, MAX_PARTICLES).step(1000).onFinishChange(restart),
+
+    particleFolder.add(controls, 'speed', 20, 400),
+
+    particleFolder.add(controls, 'alpha', 0.01, 0.3).step(0.01),
+  );
+
+  const renderFolder = gui.addFolder('Render');
+  guiControllers.push(
+    renderFolder.add(controls, 'style', ['Ink', 'Glow']),
+
+    renderFolder.add(controls, 'inkStrength', 0.2, 3.0).step(0.05),
+
+    renderFolder.add(controls, 'paperTexture', 0, 1).step(0.05),
+
+    renderFolder.add(controls, 'fade', 0, 0.05).step(0.001),
+  );
+
+  const mouseFolder = gui.addFolder('Mouse');
+  guiControllers.push(
+    mouseFolder.add(controls, 'mouseMode', ['Drag', 'Swirl']),
+
+    mouseFolder.add(controls, 'mouseRadius', 20, 600).step(10),
+
+    mouseFolder.add(controls, 'mouseStrength', 0, 3).step(0.05),
+  );
+  mouseFolder.open();
 
   
   const lineProg = new ShaderProgram([
