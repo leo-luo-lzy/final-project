@@ -93,13 +93,13 @@ This milestone focused on improving image guidance and adding more control over 
 - Implemented Drag and Swirl mouse interactions to redirect particles and reshape the local flow field. These field changes remain after releasing the mouse, until the field is rebuilt.
 - Added adjustable trail fading, a flow-field visualization, and grouped GUI controls.
 
-Cut:
+### What I Cut
 
-- Variable stroke widths: I kept fixed-width lines to prioritize orientation continuity and mouse interaction. Portable variable-width strokes would require changes to the current line renderer.
+I decided to keep thin, fixed-width lines to preserve the flowing-line style. Overlapping lines already create areas that look heavier or lighter, so variable widths were not needed for the look I wanted.
 
 ### Current Results
 
-| Generated Painting | Painting with Paper Tex |
+| Generated Painting | With Paper Texture / Mouse Interaction / Flow Visualization |
 |---|---|
 | ![](result/r5.png) | ![](result/r6.png) |
 | ![](result/r7.png) | ![](result/r8.png) |
@@ -109,7 +109,7 @@ Cut:
 
 ### Next Steps
 
-- **Variable stroke widths:** I decided to keep thin, fixed-width lines to preserve the flowing-line style. Overlapping lines already create areas that look heavier or lighter, so variable widths were not needed for the look I wanted.
+For the final submission, I will fine-tune the paintings, check performance, and prepare sample results and a short demo.
 
 
 ---  
