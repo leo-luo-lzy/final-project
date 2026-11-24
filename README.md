@@ -1,6 +1,8 @@
 
 # Image-Guided Flow Field Painting
 
+**Live Demo:** [Try it here](https://leo-luo-lzy.github.io/final-project/)
+
 ## Design Doc  
 
 ### Introduction
@@ -52,8 +54,6 @@ My goal is to build an interactive painting generator using JavaScript, WebGL, a
 
 ## Milestone #1
 
-**Live Demo:** [Try it here](https://leo-luo-lzy.github.io/final-project/)
-
 ### Progress
 
 - Implemented procedural flow fields using Perlin and curl noise.
@@ -79,6 +79,36 @@ The current Sobel-based direction field can produce noisy strokes in detailed re
 - Improve edge preservation and color sampling.
 - Add brightness-based stroke density and variable stroke widths.
 - Refine the paper texture and ink effects.
+
+## Milestone #2
+
+### Progress
+
+This milestone focused on improving image guidance and adding more control over the painting.
+
+- Added structure tensors to smooth image-derived orientations, with an adjustable smoothing radius. Sobel edge strength controls the blend between image guidance and noise.
+- Added an optional alignFlow correction that aligns neighboring vectors with the particle's heading before interpolation to reduce cancellation, seams, and particle stalling.
+- Added brightness-based particle spawning to place more strokes in darker areas, plus a switch between photo colors and an ink palette. Photo colors are sampled once at spawn, allowing each stroke to carry its color into neighboring regions for a painterly effect.
+- Added procedural paper texture that affects both paper shading and ink coverage.
+- Implemented Drag and Swirl mouse interactions to redirect particles and reshape the local flow field. These field changes remain after releasing the mouse, until the field is rebuilt.
+- Added adjustable trail fading, a flow-field visualization, and grouped GUI controls.
+
+Cut:
+
+- Variable stroke widths: I kept fixed-width lines to prioritize orientation continuity and mouse interaction. Portable variable-width strokes would require changes to the current line renderer.
+
+### Current Results
+
+| Example 1 | Example 2 |
+|---|---|
+| ![](result/r5.jpg) | ![](result/r6.png) |
+| ![](result/r7.jpg) | ![](result/r8.png) |
+
+
+### Next Steps
+
+For the final submission, I will tune the visual results, check performance, and prepare example paintings and a short demo.
+
 
 ---  
 &nbsp;

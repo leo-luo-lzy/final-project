@@ -43,7 +43,7 @@ const defaultParams = {
   fade: 0.004,
   showField: false,
   paperTexture: 0,
-  brightnessDensity: 0.5,
+  brightnessDensity: 1.0,
   photoColor: true,
 };
 
