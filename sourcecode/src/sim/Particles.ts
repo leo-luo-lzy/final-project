@@ -36,13 +36,18 @@ class Particles {
   g: Float32Array;
   b: Float32Array;
   guide: ImageGuide;
+  brightnessDensity: number = 0.0;
+  usePhotoColor: boolean = true;
   vel: Float32Array = new Float32Array(2);
 
-  constructor(count: number, width: number, height: number, guide: ImageGuide) {
+  constructor(count: number, width: number, height: number, guide: ImageGuide,
+              brightnessDensity: number, usePhotoColor: boolean) {
     this.count = count;
     this.width = width;
     this.height = height;
     this.guide = guide;
+    this.brightnessDensity = brightnessDensity;
+    this.usePhotoColor = usePhotoColor;
     this.x = new Float32Array(count);
     this.y = new Float32Array(count);
     this.vx = new Float32Array(count);
@@ -58,14 +63,25 @@ class Particles {
   }
 
   respawn(i: number) {
-    this.x[i] = Math.random() * this.width;
-    this.y[i] = Math.random() * this.height;
+    let x = Math.random() * this.width;
+    let y = Math.random() * this.height;
+    if (this.guide && this.brightnessDensity > 0) {
+      for (let t = 0; t < 8; t++) {
+        const k = this.guide.indexAt(x, y);
+        const accept = 1.0 - this.brightnessDensity * this.guide.gray[k];
+        if (Math.random() < accept) break;
+        x = Math.random() * this.width;
+        y = Math.random() * this.height;
+      }
+    }
+    this.x[i] = x;
+    this.y[i] = y;
     this.vx[i] = 0.0;
     this.vy[i] = 0.0;
     this.age[i] = 0.0;
     this.life[i] = 2.0 + Math.random() * 4.0;
 
-    if (this.guide) {
+    if (this.guide && this.usePhotoColor) {
       const k = this.guide.indexAt(this.x[i], this.y[i]);
       this.r[i] = this.guide.r[k];
       this.g[i] = this.guide.g[k];

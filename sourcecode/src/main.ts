@@ -43,6 +43,8 @@ const defaultParams = {
   fade: 0.004,
   showField: false,
   paperTexture: 0,
+  brightnessDensity: 0.5,
+  photoColor: true,
 };
 
 function main() {
@@ -109,7 +111,8 @@ function main() {
       field.applyImage(guide, controls.edgeThreshold);
       activeGuide = guide;
     }
-    particles = new Particles(controls.particleCount, canvas.width, canvas.height, activeGuide);
+    particles = new Particles(controls.particleCount, canvas.width, canvas.height, activeGuide,
+                              controls.brightnessDensity, controls.photoColor);
     accum.clear();
   }
 
@@ -167,11 +170,17 @@ function main() {
 
   const guiControllers = [
     gui.add(controls, 'showField'),
+
     gui.add(controls, 'mode', ['Noise', 'Image']).onFinishChange(restart),
 
     gui.add(controls, 'edgeThreshold', 0.005, 0.3).step(0.005).onFinishChange(restart),
 
     gui.add(controls, 'tensorRadius', 0, 12).step(1).onFinishChange(restart),
+
+    gui.add(controls, 'brightnessDensity', 0, 1).step(0.05),
+
+    gui.add(controls, 'photoColor'),
+
     gui.add(controls, 'alignFlow'),
     
     gui.add(controls, 'field', ['Curl', 'Perlin']).onFinishChange(restart),
@@ -200,7 +209,7 @@ function main() {
 
     gui.add(controls, 'mouseStrength', 0, 3).step(0.05),
 
-    gui.add(controls, 'fade', 0, 0.05).step(0.002),
+    gui.add(controls, 'fade', 0, 0.05).step(0.001),
 
     gui.add(controls, 'paused'),
   ];
@@ -252,6 +261,8 @@ function main() {
         field.sculpt(mouse, Math.min(mouse.strength * 8.0 * dt, 1.0));
       }
 
+      particles.brightnessDensity = controls.brightnessDensity;
+      particles.usePhotoColor = controls.photoColor;
       particles.step(field, controls.speed, dt, controls.alpha, mouse, batch);
       accum.bind();
       gl.enable(gl.BLEND);

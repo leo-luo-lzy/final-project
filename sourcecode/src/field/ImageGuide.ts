@@ -13,6 +13,7 @@ class ImageGuide {
   scale: number = 1.0;
   offsetX: number = 0.0;
   offsetY: number = 0.0;
+  gray: Float32Array;
 
   constructor(img: HTMLImageElement, maxSize: number) {
     const s = Math.min(1.0, maxSize / Math.max(img.width, img.height));
@@ -39,6 +40,7 @@ class ImageGuide {
       gray[i] = 0.299 * this.r[i] + 0.587 * this.g[i] + 0.114 * this.b[i];
     }
 
+    this.gray = gray;
     const blurred = boxBlur(boxBlur(gray, w, h, 2), w, h, 2);
 
     this.gx = new Float32Array(n);
