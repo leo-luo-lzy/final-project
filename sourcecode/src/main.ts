@@ -21,6 +21,7 @@ const PAPER = [0.96, 0.94, 0.89];
 const CELL_SIZE = 8;
 const MAX_PARTICLES = 50000;
 const IMAGE_MAX_SIZE = 512;
+const FOCUS_RADIUS = 16;
 
 const defaultParams = {
   mouseMode: 'Drag',
@@ -45,6 +46,7 @@ const defaultParams = {
   paperTexture: 0,
   brightnessDensity: 1.0,
   photoColor: true,
+  subjectFocus: 0.0,
 };
 
 function main() {
@@ -108,11 +110,13 @@ function main() {
     if (controls.mode === 'Image' && guide) {
       guide.fitTo(canvas.width, canvas.height);
       guide.computeTensor(controls.tensorRadius);
+      guide.computeFocus(FOCUS_RADIUS);
       field.applyImage(guide, controls.edgeThreshold);
       activeGuide = guide;
     }
     particles = new Particles(controls.particleCount, canvas.width, canvas.height, activeGuide,
-                              controls.brightnessDensity, controls.photoColor);
+                              controls.brightnessDensity, controls.photoColor,
+                              controls.subjectFocus);
     accum.clear();
   }
 
@@ -204,6 +208,8 @@ function main() {
     imageFolder.add(controls, 'brightnessDensity', 0, 1).step(0.05),
 
     imageFolder.add(controls, 'photoColor'),
+
+    imageFolder.add(controls, 'subjectFocus', 0, 1).step(0.05),
   );
   imageFolder.open();
 
@@ -281,6 +287,7 @@ function main() {
 
       particles.brightnessDensity = controls.brightnessDensity;
       particles.usePhotoColor = controls.photoColor;
+      particles.subjectFocus = controls.subjectFocus;
       particles.step(field, controls.speed, dt, controls.alpha, mouse, batch);
       accum.bind();
       gl.enable(gl.BLEND);

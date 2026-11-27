@@ -14,6 +14,7 @@ class ImageGuide {
   offsetX: number = 0.0;
   offsetY: number = 0.0;
   gray: Float32Array;
+  focus: Float32Array;
 
   constructor(img: HTMLImageElement, maxSize: number) {
     const s = Math.min(1.0, maxSize / Math.max(img.width, img.height));
@@ -76,6 +77,19 @@ class ImageGuide {
     this.scale = Math.max(canvasW / this.width, canvasH / this.height);
     this.offsetX = (canvasW - this.width * this.scale) * 0.5;
     this.offsetY = (canvasH - this.height * this.scale) * 0.5;
+  }
+
+  computeFocus(radius: number) {
+    const w = this.width;
+    const h = this.height;
+    const n = w * h;
+    const blurred = boxBlur(boxBlur(this.strength, w, h, radius), w, h, radius);
+    let maxV = 0.0;
+    for (let k = 0; k < n; k++) maxV = Math.max(maxV, blurred[k]);
+    this.focus = new Float32Array(n);
+    for (let k = 0; k < n; k++) {
+      this.focus[k] = Math.min(1.0, 2.0 * blurred[k] / (maxV + 1e-6));
+    }
   }
 
   computeTensor(radius: number) {

@@ -16,6 +16,8 @@ export interface Mouse {
   strength: number;
 }
 
+const PAPER = [0.96, 0.94, 0.89];
+
 const INKS = [
   [0.07, 0.08, 0.09],
   [0.10, 0.14, 0.32],
@@ -39,15 +41,17 @@ class Particles {
   brightnessDensity: number = 0.0;
   usePhotoColor: boolean = true;
   vel: Float32Array = new Float32Array(2);
+  subjectFocus: number = 0.0;
 
   constructor(count: number, width: number, height: number, guide: ImageGuide,
-              brightnessDensity: number, usePhotoColor: boolean) {
+              brightnessDensity: number, usePhotoColor: boolean, subjectFocus: number) {
     this.count = count;
     this.width = width;
     this.height = height;
     this.guide = guide;
     this.brightnessDensity = brightnessDensity;
     this.usePhotoColor = usePhotoColor;
+    this.subjectFocus = subjectFocus;
     this.x = new Float32Array(count);
     this.y = new Float32Array(count);
     this.vx = new Float32Array(count);
@@ -65,15 +69,16 @@ class Particles {
   respawn(i: number) {
     let x = Math.random() * this.width;
     let y = Math.random() * this.height;
-    if (this.guide && this.brightnessDensity > 0) {
-      for (let t = 0; t < 8; t++) {
-        const k = this.guide.indexAt(x, y);
-        const accept = 1.0 - this.brightnessDensity * this.guide.gray[k];
-        if (Math.random() < accept) break;
-        x = Math.random() * this.width;
-        y = Math.random() * this.height;
-      }
+    if (this.guide && (this.brightnessDensity > 0 || this.subjectFocus > 0)) {
+    for (let t = 0; t < 8; t++) {
+      const k = this.guide.indexAt(x, y);
+      let accept = 1.0 - this.brightnessDensity * this.guide.gray[k];
+      accept *= 1.0 - this.subjectFocus * (1.0 - this.guide.focus[k]);
+      if (Math.random() < accept) break;
+      x = Math.random() * this.width;
+      y = Math.random() * this.height;
     }
+  }
     this.x[i] = x;
     this.y[i] = y;
     this.vx[i] = 0.0;
@@ -83,10 +88,11 @@ class Particles {
 
     if (this.guide && this.usePhotoColor) {
       const k = this.guide.indexAt(this.x[i], this.y[i]);
-      this.r[i] = this.guide.r[k];
-      this.g[i] = this.guide.g[k];
-      this.b[i] = this.guide.b[k];
-    } else {
+      const fade = 0.7 * this.subjectFocus * (1.0 - this.guide.focus[k]);
+      this.r[i] = this.guide.r[k] + (PAPER[0] - this.guide.r[k]) * fade;
+      this.g[i] = this.guide.g[k] + (PAPER[1] - this.guide.g[k]) * fade;
+      this.b[i] = this.guide.b[k] + (PAPER[2] - this.guide.b[k]) * fade;
+  } else {
       const p = Math.random();
       const ink = p < 0.2 ? INKS[0] : (p < 0.7 ? INKS[1] : INKS[2]);
       this.r[i] = ink[0];
